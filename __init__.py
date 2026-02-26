@@ -2,6 +2,8 @@ from comfy_api.latest import ComfyExtension, IO
 from .if_branch_node import IfBranchNode
 from .dynamic_dropdown_node import DynamicDropdownNode
 
+WEB_DIRECTORY = "./web"
+
 
 class PMNodesExtension(ComfyExtension):
     async def get_node_list(self) -> list[type[IO.ComfyNode]]:
