@@ -3,7 +3,7 @@ from .if_branch_node import IfBranchNode
 from .dynamic_dropdown_node import DynamicDropdownNode
 
 
-class TestImageExtension(ComfyExtension):
+class PMNodesExtension(ComfyExtension):
     async def get_node_list(self) -> list[type[IO.ComfyNode]]:
         return [
             DynamicDropdownNode,
@@ -11,5 +11,5 @@ class TestImageExtension(ComfyExtension):
         ]
 
 
-async def comfy_entrypoint() -> TestImageExtension:
-    return TestImageExtension()
+async def comfy_entrypoint() -> PMNodesExtension:
+    return PMNodesExtension()
