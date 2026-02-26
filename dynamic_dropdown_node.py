@@ -10,15 +10,8 @@ class DynamicDropdownNode(IO.ComfyNode):
             display_name="动态下拉框",
             category="PM Nodes",
             inputs=[
-                IO.String.Input(
-                    "options",
-                    default="选项1,选项2,选项3",
-                    multiline=False,
-                ),
-                IO.Combo.Input(
-                    "selection",
-                    options=["选项1", "选项2", "选项3"],
-                ),
+                IO.String.Input("options", default="选项1,选项2,选项3", multiline=False),
+                IO.Combo.Input("selection", options=["选项1", "选项2", "选项3"]),
             ],
             outputs=[
                 IO.Int.Output("index"),

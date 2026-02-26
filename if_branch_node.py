@@ -9,24 +9,11 @@ class IfBranchNode(IO.ComfyNode):
             display_name="IF分支",
             category="PM Nodes",
             inputs=[
-                IO.Boolean.Input(
-                    "condition",
-                    default=True,
-                ),
-                IO.AnyType.Input(
-                    "true_value",
-                    lazy=True,
-                    extra_dict={"forceInput": True},
-                ),
-                IO.AnyType.Input(
-                    "false_value",
-                    lazy=True,
-                    extra_dict={"forceInput": True},
-                ),
+                IO.Boolean.Input("condition", default=True),
+                IO.AnyType.Input("true_value", lazy=True, extra_dict={"forceInput": True}),
+                IO.AnyType.Input("false_value", lazy=True, extra_dict={"forceInput": True}),
             ],
-            outputs=[
-                IO.AnyType.Output("result"),
-            ],
+            outputs=[IO.AnyType.Output("result"),],
         )
 
     @classmethod
