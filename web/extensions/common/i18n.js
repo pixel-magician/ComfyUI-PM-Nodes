@@ -58,6 +58,19 @@ async function fetchTranslations(locale) {
             console.warn('[PM Nodes] No translations found for locale:', locale);
             translations = {};
         }
+        
+        // 单独加载 nodeDefs.json
+        try {
+            const nodeDefsResponse = await api.fetchApi(`/extensions/ComfyUI-PM-Nodes/locales/${locale}/nodeDefs.json`);
+            if (nodeDefsResponse.ok) {
+                const nodeDefsData = await nodeDefsResponse.json();
+                translations['nodeDefs'] = nodeDefsData;
+                console.log('[PM Nodes] Loaded nodeDefs for locale:', locale);
+            }
+        } catch (nodeDefsError) {
+            console.warn('[PM Nodes] Failed to load nodeDefs:', nodeDefsError);
+        }
+        
         localeChangeListeners.forEach(listener => {
             try { listener(locale); } catch (e) {
                 console.error('[PM Nodes] Error in locale change listener:', e);
@@ -104,6 +117,73 @@ export function onLocaleChange(callback) {
     };
 }
 
+// 更新节点分类翻译
+function updateNodeCategories() {
+    if (!window.LiteGraph || !window.LiteGraph.registered_node_types) {
+        console.log('[PM Nodes] LiteGraph not available');
+        return;
+    }
+
+    const nodeCategories = translations['nodeCategories'];
+    const nodeDefs = translations['nodeDefs'];
+    
+    console.log('[PM Nodes] Updating categories and titles...');
+
+    // 更新所有已注册的节点类型
+    for (const [nodeType, nodeDef] of Object.entries(window.LiteGraph.registered_node_types)) {
+        // 更新分类
+        if (nodeCategories && nodeDef.category && nodeCategories[nodeDef.category]) {
+            const originalCategory = nodeDef.category;
+            nodeDef.category = nodeCategories[originalCategory];
+            if (nodeDef._category) {
+                nodeDef._category = nodeCategories[originalCategory];
+            }
+            console.log('[PM Nodes] Updated category for', nodeType, ':', originalCategory, '->', nodeDef.category);
+        }
+
+        // 更新标题（从 nodeDefs 翻译中读取 display_name）
+        if (nodeDefs && nodeDefs[nodeType] && nodeDefs[nodeType].display_name) {
+            const translatedTitle = nodeDefs[nodeType].display_name;
+            
+            // 更新节点类型的 title（影响节点库中的显示）
+            nodeDef.title = translatedTitle;
+            if (nodeDef.constructor) {
+                nodeDef.constructor.title = translatedTitle;
+            }
+            
+            console.log('[PM Nodes] Updated title for', nodeType, ':', translatedTitle);
+        }
+    }
+
+    // 更新画布上已存在的节点实例的标题
+    if (window.app && window.app.graph && window.app.graph._nodes) {
+        for (const node of window.app.graph._nodes) {
+            const nodeType = node.type;
+            if (nodeDefs && nodeDefs[nodeType] && nodeDefs[nodeType].display_name) {
+                const translatedTitle = nodeDefs[nodeType].display_name;
+                node.title = translatedTitle;
+                console.log('[PM Nodes] Updated instance title for', nodeType, ':', translatedTitle);
+            }
+        }
+    }
+
+    // 触发 ComfyUI 重新构建节点菜单
+    if (window.app && window.app.ui && window.app.ui.nodeLibrary) {
+        try {
+            window.app.ui.nodeLibrary.rebuild();
+            console.log('[PM Nodes] Node library rebuilt');
+        } catch (e) {
+            console.warn('[PM Nodes] Failed to rebuild node library:', e);
+        }
+    }
+    
+    // 重绘画布
+    if (window.app && window.app.canvas) {
+        window.app.canvas.setDirty(true, true);
+        console.log('[PM Nodes] Canvas redraw triggered');
+    }
+}
+
 // 初始化：快速加载 → 等待 app 就绪 → 校准 locale → 启动监控
 async function init() {
     // 第一步：快速加载，保证 t() 尽快有数据（locale 可能不准确）
@@ -122,6 +202,9 @@ async function init() {
         await fetchTranslations(actualLocale);
     }
 
+    // 更新节点分类翻译
+    updateNodeCategories();
+
     // 第三步：启动 locale 变化监控，baseline 用实际加载的 locale
     let lastLocale = currentLocale;
     setInterval(() => {
@@ -129,7 +212,9 @@ async function init() {
         if (newLocale !== lastLocale) {
             console.log('[PM Nodes] Locale changed from', lastLocale, 'to', newLocale);
             lastLocale = newLocale;
-            reloadTranslations(newLocale);
+            reloadTranslations(newLocale).then(() => {
+                updateNodeCategories();
+            });
         }
     }, 1000);
 
