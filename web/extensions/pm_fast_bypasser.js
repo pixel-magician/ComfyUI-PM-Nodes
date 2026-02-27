@@ -9,7 +9,7 @@
  * The first input "Master Toggle" can receive external bool value to control all switches.
  */
 import { app } from "/scripts/app.js";
-import { t, getNodeDisplayName, getCategoryPath, onLocaleChange } from "./common/i18n.js";
+import { t } from "./common/i18n.js";
 
 const NODE_TYPE = "PM Fast Bypasser";
 const CATEGORY = "PM Nodes/Switch Management";
@@ -78,12 +78,6 @@ class PMFastBypasserNode extends LGraphNode {
         if (!this.graph) return;
         let dirty = false;
         this._tempWidth = this.size[0];
-
-        const displayName = getNodeDisplayName(NODE_TYPE);
-        if (this.title !== displayName) {
-            this.title = displayName;
-            dirty = true;
-        }
 
         const masterLabel = t('masterToggle', 'Master Toggle');
         if (this.inputs[0] && this.inputs[0].name !== masterLabel) {
@@ -265,17 +259,11 @@ app.registerExtension({
     name: "ComfyUI.PM.FastBypasser",
     registerCustomNodes() {
         LiteGraph.registerNodeType(NODE_TYPE, PMFastBypasserNode);
-        PMFastBypasserNode.category = getCategoryPath(CATEGORY);
-        PMFastBypasserNode.title = getNodeDisplayName(NODE_TYPE);
-        onLocaleChange(() => {
-            PMFastBypasserNode.category = getCategoryPath(CATEGORY);
-            PMFastBypasserNode.title = getNodeDisplayName(NODE_TYPE);
-        });
+        PMFastBypasserNode.category = CATEGORY;
     },
     loadedGraphNode(node) {
         if (node.type === NODE_TYPE) {
             node._tempWidth = node.size[0];
-            node.title = getNodeDisplayName(NODE_TYPE);
         }
     },
 });

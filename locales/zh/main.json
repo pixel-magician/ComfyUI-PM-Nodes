@@ -1,6 +1,7 @@
 {
   "nodeCategories": {
     "PM Nodes": "魔法师的节点库",
+    "Switch Management": "开关管理",
     "PM Nodes/Switch Management": "魔法师的节点库/开关管理"
   },
   "dynamicDropdown": "动态下拉框",

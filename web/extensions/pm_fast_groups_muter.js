@@ -6,10 +6,7 @@
  */
 import { app } from "/scripts/app.js";
 import { createFastGroupsNodeClass } from "./pm_groups_shared.js";
-import { getNodeDisplayName, getCategoryPath } from "./common/i18n.js";
-
 const NODE_TYPE = "PM Fast Groups Muter";
-const CATEGORY = "PM Nodes/Switch Management";
 
 const PMFastGroupsMuterNode = createFastGroupsNodeClass({
     nodeType: NODE_TYPE,
@@ -22,13 +19,11 @@ app.registerExtension({
     name: "ComfyUI.PM.FastGroupsMuter",
     registerCustomNodes() {
         LiteGraph.registerNodeType(NODE_TYPE, PMFastGroupsMuterNode);
-        PMFastGroupsMuterNode.category = getCategoryPath(CATEGORY);
-        PMFastGroupsMuterNode.title = getNodeDisplayName(NODE_TYPE);
+        PMFastGroupsMuterNode.category = "PM Nodes/Switch Management";
     },
     loadedGraphNode(node) {
         if (node.type === NODE_TYPE) {
             node._tempSize = [...node.size];
-            node.title = getNodeDisplayName(NODE_TYPE);
         }
     },
 });

@@ -6,10 +6,7 @@
  */
 import { app } from "/scripts/app.js";
 import { createFastGroupsNodeClass } from "./pm_groups_shared.js";
-import { getNodeDisplayName, getCategoryPath } from "./common/i18n.js";
-
 const NODE_TYPE = "PM Fast Groups Bypasser";
-const CATEGORY = "PM Nodes/Switch Management";
 const MODE_BYPASS = 4;
 
 const PMFastGroupsBypasserNode = createFastGroupsNodeClass({
@@ -23,13 +20,11 @@ app.registerExtension({
     name: "ComfyUI.PM.FastGroupsBypasser",
     registerCustomNodes() {
         LiteGraph.registerNodeType(NODE_TYPE, PMFastGroupsBypasserNode);
-        PMFastGroupsBypasserNode.category = getCategoryPath(CATEGORY);
-        PMFastGroupsBypasserNode.title = getNodeDisplayName(NODE_TYPE);
+        PMFastGroupsBypasserNode.category = "PM Nodes/Switch Management";
     },
     loadedGraphNode(node) {
         if (node.type === NODE_TYPE) {
             node._tempSize = [...node.size];
-            node.title = getNodeDisplayName(NODE_TYPE);
         }
     },
 });

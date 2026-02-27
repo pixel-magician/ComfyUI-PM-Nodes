@@ -1,6 +1,12 @@
 from comfy_api.latest import ComfyExtension, IO
 from .if_branch_node import IfBranchNode
 from .dynamic_dropdown_node import DynamicDropdownNode
+from .virtual_nodes import (
+    PMFastMuter,
+    PMFastBypasser,
+    PMFastGroupsMuter,
+    PMFastGroupsBypasser,
+)
 
 WEB_DIRECTORY = "./web"
 
@@ -10,6 +16,10 @@ class PMNodesExtension(ComfyExtension):
         return [
             DynamicDropdownNode,
             IfBranchNode,
+            PMFastMuter,
+            PMFastBypasser,
+            PMFastGroupsMuter,
+            PMFastGroupsBypasser,
         ]
 
 

@@ -5,7 +5,7 @@
  * shared by "Fast Groups Bypasser" and "Fast Groups Muter" nodes.
  */
 import { app } from "/scripts/app.js";
-import { t, getNodeDisplayName, getCategoryPath, onLocaleChange } from "./common/i18n.js";
+import { t } from "./common/i18n.js";
 
 const PROP_MATCH_COLORS = "matchColors";
 const PROP_MATCH_TITLE = "matchTitle";
@@ -383,11 +383,6 @@ export function createFastGroupsNodeClass({ nodeType, modeOn, modeOff, offMenuLa
         }
 
         refreshWidgets() {
-            const displayName = getNodeDisplayName(nodeType);
-            if (this.title !== displayName) {
-                this.title = displayName;
-            }
-
             const sort = this.properties?.[PROP_SORT] || "position";
             const groups = [...groupsService.getGroups(sort)];
 
@@ -588,11 +583,6 @@ export function createFastGroupsNodeClass({ nodeType, modeOn, modeOff, offMenuLa
         type: "combo",
         values: ["default", "max one", "always one"],
     };
-
-    onLocaleChange(() => {
-        PMFastGroupsNode.title = getNodeDisplayName(nodeType);
-        PMFastGroupsNode.category = getCategoryPath(CATEGORY);
-    });
 
     return PMFastGroupsNode;
 }

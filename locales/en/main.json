@@ -1,6 +1,7 @@
 {
   "nodeCategories": {
     "PM Nodes": "PM Nodes",
+    "Switch Management": "Switch Management",
     "PM Nodes/Switch Management": "PM Nodes/Switch Management"
   },
   "dynamicDropdown": "Dynamic Dropdown",
