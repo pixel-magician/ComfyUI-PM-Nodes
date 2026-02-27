@@ -1,10 +1,11 @@
 /**
- * PM 快速多框节点的共享模块
+ * PM Fast Groups Shared Module
  *
- * 包含 Groups Service（单例）、Toggle Widget、工具函数，
- * 供"忽略多框"和"禁用多框"两个节点共用。
+ * Contains Groups Service (singleton), Toggle Widget, utility functions,
+ * shared by "Fast Groups Bypasser" and "Fast Groups Muter" nodes.
  */
 import { app } from "/scripts/app.js";
+import { t, getNodeDisplayName, getCategoryPath, onLocaleChange } from "./common/i18n.js";
 
 const PROP_MATCH_COLORS = "matchColors";
 const PROP_MATCH_TITLE = "matchTitle";
@@ -328,7 +329,7 @@ export const groupsService = new PMGroupsService();
 // ─── Factory: create a Fast Groups mode-changer node class ───
 
 export function createFastGroupsNodeClass({ nodeType, modeOn, modeOff, offMenuLabel }) {
-    const CATEGORY = "PM Nodes/开关管理";
+    const CATEGORY = "PM Nodes/Switch Management";
 
     class PMFastGroupsNode extends LGraphNode {
         static title = nodeType;
@@ -382,6 +383,11 @@ export function createFastGroupsNodeClass({ nodeType, modeOn, modeOff, offMenuLa
         }
 
         refreshWidgets() {
+            const displayName = getNodeDisplayName(nodeType);
+            if (this.title !== displayName) {
+                this.title = displayName;
+            }
+
             const sort = this.properties?.[PROP_SORT] || "position";
             const groups = [...groupsService.getGroups(sort)];
 
@@ -428,7 +434,7 @@ export function createFastGroupsNodeClass({ nodeType, modeOn, modeOff, offMenuLa
             let index = 0;
             for (const group of matchedGroups) {
                 let isDirty = false;
-                const widgetLabel = `启用 ${group.title}`;
+                const widgetLabel = `${t('enable', 'Enable')} ${group.title}`;
                 let widget = this.widgets.find((w) => w.label === widgetLabel);
 
                 if (!widget) {
@@ -531,7 +537,7 @@ export function createFastGroupsNodeClass({ nodeType, modeOn, modeOff, offMenuLa
         getExtraMenuOptions(_canvas, options) {
             options.push(null);
             options.push({
-                content: `${offMenuLabel}全部`,
+                content: t(`${offMenuLabel.toLowerCase()}All`, `${offMenuLabel} All`),
                 callback: () => {
                     const alwaysOne = this.properties[PROP_RESTRICTION] === "always one";
                     for (const [i, widget] of this.widgets.entries()) {
@@ -541,7 +547,7 @@ export function createFastGroupsNodeClass({ nodeType, modeOn, modeOff, offMenuLa
                 },
             });
             options.push({
-                content: "启用全部",
+                content: t('enableAll', 'Enable All'),
                 callback: () => {
                     const onlyOne = this.properties[PROP_RESTRICTION]?.includes(" one");
                     for (const [i, widget] of this.widgets.entries()) {
@@ -551,7 +557,7 @@ export function createFastGroupsNodeClass({ nodeType, modeOn, modeOff, offMenuLa
                 },
             });
             options.push({
-                content: "切换全部",
+                content: t('toggleAll', 'Toggle All'),
                 callback: () => {
                     const onlyOne = this.properties[PROP_RESTRICTION]?.includes(" one");
                     let foundOne = false;
@@ -582,6 +588,11 @@ export function createFastGroupsNodeClass({ nodeType, modeOn, modeOff, offMenuLa
         type: "combo",
         values: ["default", "max one", "always one"],
     };
+
+    onLocaleChange(() => {
+        PMFastGroupsNode.title = getNodeDisplayName(nodeType);
+        PMFastGroupsNode.category = getCategoryPath(CATEGORY);
+    });
 
     return PMFastGroupsNode;
 }

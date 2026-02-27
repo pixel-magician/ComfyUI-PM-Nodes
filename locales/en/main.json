@@ -1,0 +1,26 @@
+{
+  "nodeCategories": {
+    "PM Nodes": "PM Nodes",
+    "PM Nodes/Switch Management": "PM Nodes/Switch Management"
+  },
+  "dynamicDropdown": "Dynamic Dropdown",
+  "ifBranch": "IF Branch",
+  "options": "Options",
+  "selection": "Selection",
+  "index": "Index",
+  "selectedValue": "Selected Value",
+  "condition": "Condition",
+  "trueValue": "True Value",
+  "falseValue": "False Value",
+  "result": "Result",
+  "enable": "Enable",
+  "fastBypasser": "Fast Bypasser",
+  "fastMuter": "Fast Muter",
+  "fastGroupsBypasser": "Fast Groups Bypasser",
+  "fastGroupsMuter": "Fast Groups Muter",
+  "masterToggle": "Master Toggle",
+  "muteAll": "Mute All",
+  "bypassAll": "Bypass All",
+  "enableAll": "Enable All",
+  "toggleAll": "Toggle All"
+}

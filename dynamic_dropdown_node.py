@@ -7,11 +7,11 @@ class DynamicDropdownNode(IO.ComfyNode):
     def define_schema(cls) -> IO.Schema:
         return IO.Schema(
             node_id="DynamicDropdown",
-            display_name="动态下拉框",
+            display_name="Dynamic Dropdown",
             category="PM Nodes",
             inputs=[
-                IO.String.Input("options", default="选项1,选项2,选项3", multiline=False),
-                IO.Combo.Input("selection", options=["选项1", "选项2", "选项3"]),
+                IO.String.Input("options", default="Option1,Option2,Option3", multiline=False),
+                IO.Combo.Input("selection", options=["Option1", "Option2", "Option3"]),
             ],
             outputs=[
                 IO.Int.Output("index"),
@@ -46,8 +46,8 @@ class DynamicDropdownNode(IO.ComfyNode):
     def VALIDATE_INPUTS(cls, options, selection):
         option_list = cls.parse_options(options)
         if not option_list:
-            return "至少需要提供一个选项"
+            return "At least one option is required"
         if selection not in option_list:
-            return f"选择的值 '{selection}' 不在选项列表中"
+            return f"Selected value '{selection}' is not in the options list"
         return True
 

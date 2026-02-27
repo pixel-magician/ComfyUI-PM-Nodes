@@ -1,0 +1,58 @@
+{
+  "DynamicDropdown": {
+    "display_name": "Dynamic Dropdown",
+    "description": "Dynamically create dropdown options and return selected index and value",
+    "inputs": {
+      "options": {
+        "name": "Options"
+      },
+      "selection": {
+        "name": "Selection"
+      }
+    },
+    "outputs": {
+      "0": {
+        "name": "Index"
+      },
+      "1": {
+        "name": "Selected Value"
+      }
+    }
+  },
+  "IfBranchNode": {
+    "display_name": "IF Branch",
+    "description": "Return true value or false value based on condition",
+    "inputs": {
+      "condition": {
+        "name": "Condition"
+      },
+      "true_value": {
+        "name": "True Value"
+      },
+      "false_value": {
+        "name": "False Value"
+      }
+    },
+    "outputs": {
+      "0": {
+        "name": "Result"
+      }
+    }
+  },
+  "PM Fast Bypasser": {
+    "display_name": "Fast Bypasser",
+    "description": "Quickly toggle enable/bypass status of connected nodes"
+  },
+  "PM Fast Muter": {
+    "display_name": "Fast Muter",
+    "description": "Quickly toggle enable/mute status of connected nodes"
+  },
+  "PM Fast Groups Bypasser": {
+    "display_name": "Fast Groups Bypasser",
+    "description": "Automatically collect all groups in workflow and toggle enable/bypass status"
+  },
+  "PM Fast Groups Muter": {
+    "display_name": "Fast Groups Muter",
+    "description": "Automatically collect all groups in workflow and toggle enable/mute status"
+  }
+}

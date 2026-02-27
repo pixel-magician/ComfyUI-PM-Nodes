@@ -1,0 +1,26 @@
+{
+  "nodeCategories": {
+    "PM Nodes": "魔法师的节点库",
+    "PM Nodes/Switch Management": "魔法师的节点库/开关管理"
+  },
+  "dynamicDropdown": "动态下拉框",
+  "ifBranch": "IF分支",
+  "options": "选项",
+  "selection": "选择",
+  "index": "索引",
+  "selectedValue": "选中值",
+  "condition": "条件",
+  "trueValue": "真值",
+  "falseValue": "假值",
+  "result": "结果",
+  "enable": "启用",
+  "fastBypasser": "快速忽略",
+  "fastMuter": "快速禁用",
+  "fastGroupsBypasser": "快速忽略多框",
+  "fastGroupsMuter": "快速禁用多框",
+  "masterToggle": "总开关",
+  "muteAll": "禁用全部",
+  "bypassAll": "忽略全部",
+  "enableAll": "启用全部",
+  "toggleAll": "切换全部"
+}

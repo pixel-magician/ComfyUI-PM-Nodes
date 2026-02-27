@@ -1,0 +1,58 @@
+{
+  "DynamicDropdown": {
+    "display_name": "动态下拉框",
+    "description": "动态创建下拉选项并返回选中的索引和值",
+    "inputs": {
+      "options": {
+        "name": "选项"
+      },
+      "selection": {
+        "name": "选择"
+      }
+    },
+    "outputs": {
+      "0": {
+        "name": "索引"
+      },
+      "1": {
+        "name": "选中值"
+      }
+    }
+  },
+  "IfBranchNode": {
+    "display_name": "IF分支",
+    "description": "根据条件选择返回真值或假值",
+    "inputs": {
+      "condition": {
+        "name": "条件"
+      },
+      "true_value": {
+        "name": "真值"
+      },
+      "false_value": {
+        "name": "假值"
+      }
+    },
+    "outputs": {
+      "0": {
+        "name": "结果"
+      }
+    }
+  },
+  "PM Fast Bypasser": {
+    "display_name": "快速忽略",
+    "description": "通过连接其他节点来快速切换它们的启用/忽略状态"
+  },
+  "PM Fast Muter": {
+    "display_name": "快速禁用",
+    "description": "通过连接其他节点来快速切换它们的启用/禁用状态"
+  },
+  "PM Fast Groups Bypasser": {
+    "display_name": "快速忽略多框",
+    "description": "自动收集工作流中所有分组，快速切换组内所有节点的启用/忽略状态"
+  },
+  "PM Fast Groups Muter": {
+    "display_name": "快速禁用多框",
+    "description": "自动收集工作流中所有分组，快速切换组内所有节点的启用/禁用状态"
+  }
+}

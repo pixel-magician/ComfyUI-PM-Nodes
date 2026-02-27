@@ -6,7 +6,7 @@ class IfBranchNode(IO.ComfyNode):
     def define_schema(cls):
         return IO.Schema(
             node_id="IfBranchNode",
-            display_name="IF分支",
+            display_name="IF Branch",
             category="PM Nodes",
             inputs=[
                 IO.Boolean.Input("condition", default=True),

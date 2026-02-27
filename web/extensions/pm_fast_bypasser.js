@@ -1,17 +1,18 @@
 /**
- * PM 忽略节点开关 (Fast Bypasser)
+ * PM Fast Bypasser
  *
- * 纯前端虚拟节点，通过连接其他节点来快速切换它们的启用/忽略状态。
- * 忽略后节点变为灰色（Bypass, mode=4）。
+ * Frontend virtual node to quickly toggle enable/bypass status of connected nodes.
+ * Bypassed nodes become gray (Bypass, mode=4).
  *
- * 使用方式：将需要控制的节点的任意输出连接到本节点的输入端，
- * 节点会自动为每个连接的节点创建一个开关控件。
- * 第一个输入端口"总开关"可接收外部 bool 值，控制所有开关。
+ * Usage: Connect any output of the nodes you want to control to this node's input.
+ * The node will automatically create toggle controls for each connected node.
+ * The first input "Master Toggle" can receive external bool value to control all switches.
  */
 import { app } from "/scripts/app.js";
+import { t, getNodeDisplayName, getCategoryPath, onLocaleChange } from "./common/i18n.js";
 
-const NODE_TYPE = "PM 忽略节点开关";
-const CATEGORY = "PM Nodes/开关管理";
+const NODE_TYPE = "PM Fast Bypasser";
+const CATEGORY = "PM Nodes/Switch Management";
 const MODE_BYPASS = 4;
 
 class PMFastBypasserNode extends LGraphNode {
@@ -34,7 +35,7 @@ class PMFastBypasserNode extends LGraphNode {
         this.properties["toggleRestriction"] = "default";
         this.widgets = this.widgets || [];
 
-        this.addInput("总开关", "BOOLEAN");
+        this.addInput(t('masterToggle', 'Master Toggle'), "BOOLEAN");
         this.addInput("", "*");
     }
 
@@ -78,7 +79,19 @@ class PMFastBypasserNode extends LGraphNode {
         let dirty = false;
         this._tempWidth = this.size[0];
 
-        dirty = this._stabilizeInputs();
+        const displayName = getNodeDisplayName(NODE_TYPE);
+        if (this.title !== displayName) {
+            this.title = displayName;
+            dirty = true;
+        }
+
+        const masterLabel = t('masterToggle', 'Master Toggle');
+        if (this.inputs[0] && this.inputs[0].name !== masterLabel) {
+            this.inputs[0].name = masterLabel;
+            dirty = true;
+        }
+
+        dirty = this._stabilizeInputs() || dirty;
 
         const linkedNodes = this._getLinkedInputNodes();
         dirty = this._updateWidgets(linkedNodes) || dirty;
@@ -170,7 +183,7 @@ class PMFastBypasserNode extends LGraphNode {
     _setWidget(widget, linkedNode) {
         let changed = false;
         const value = linkedNode.mode === this.modeOn;
-        const name = `启用 ${linkedNode.title}`;
+        const name = `${t('enable', 'Enable')} ${linkedNode.title}`;
 
         if (widget.name !== name) {
             widget.name = name;
@@ -221,7 +234,7 @@ class PMFastBypasserNode extends LGraphNode {
     getExtraMenuOptions(_canvas, options) {
         options.push(null);
         options.push({
-            content: "忽略全部",
+            content: t('bypassAll', 'Bypass All'),
             callback: () => {
                 for (const widget of this.widgets) {
                     widget.doModeChange?.(false, true);
@@ -229,7 +242,7 @@ class PMFastBypasserNode extends LGraphNode {
             },
         });
         options.push({
-            content: "启用全部",
+            content: t('enableAll', 'Enable All'),
             callback: () => {
                 for (const widget of this.widgets) {
                     widget.doModeChange?.(true, true);
@@ -237,7 +250,7 @@ class PMFastBypasserNode extends LGraphNode {
             },
         });
         options.push({
-            content: "切换全部",
+            content: t('toggleAll', 'Toggle All'),
             callback: () => {
                 for (const widget of this.widgets) {
                     widget.doModeChange?.(!widget.value, true);
@@ -252,11 +265,17 @@ app.registerExtension({
     name: "ComfyUI.PM.FastBypasser",
     registerCustomNodes() {
         LiteGraph.registerNodeType(NODE_TYPE, PMFastBypasserNode);
-        PMFastBypasserNode.category = CATEGORY;
+        PMFastBypasserNode.category = getCategoryPath(CATEGORY);
+        PMFastBypasserNode.title = getNodeDisplayName(NODE_TYPE);
+        onLocaleChange(() => {
+            PMFastBypasserNode.category = getCategoryPath(CATEGORY);
+            PMFastBypasserNode.title = getNodeDisplayName(NODE_TYPE);
+        });
     },
     loadedGraphNode(node) {
         if (node.type === NODE_TYPE) {
             node._tempWidth = node.size[0];
+            node.title = getNodeDisplayName(NODE_TYPE);
         }
     },
 });
