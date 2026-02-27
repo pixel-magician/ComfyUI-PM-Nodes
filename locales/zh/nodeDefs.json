@@ -40,19 +40,19 @@
     }
   },
   "PM Fast Bypasser": {
-    "display_name": "快速忽略",
+    "display_name": "忽略节点开关",
     "description": "通过连接其他节点来快速切换它们的启用/忽略状态"
   },
   "PM Fast Muter": {
-    "display_name": "快速禁用",
+    "display_name": "禁用节点开关",
     "description": "通过连接其他节点来快速切换它们的启用/禁用状态"
   },
   "PM Fast Groups Bypasser": {
-    "display_name": "快速忽略多框",
+    "display_name": "忽略分组开关",
     "description": "自动收集工作流中所有分组，快速切换组内所有节点的启用/忽略状态"
   },
   "PM Fast Groups Muter": {
-    "display_name": "快速禁用多框",
+    "display_name": "禁用分组开关",
     "description": "自动收集工作流中所有分组，快速切换组内所有节点的启用/禁用状态"
   }
 }
