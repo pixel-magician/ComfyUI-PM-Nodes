@@ -53,9 +53,9 @@ async function fetchTranslations(locale) {
         if (data[locale]) {
             translations = data[locale];
             currentLocale = locale;
-            console.log('[PM Nodes] Loaded translations for locale:', locale);
+            // console.log('[PM Nodes] Loaded translations for locale:', locale);
         } else {
-            console.warn('[PM Nodes] No translations found for locale:', locale);
+            // console.warn('[PM Nodes] No translations found for locale:', locale);
             translations = {};
         }
         
@@ -65,19 +65,19 @@ async function fetchTranslations(locale) {
             if (nodeDefsResponse.ok) {
                 const nodeDefsData = await nodeDefsResponse.json();
                 translations['nodeDefs'] = nodeDefsData;
-                console.log('[PM Nodes] Loaded nodeDefs for locale:', locale);
+                // console.log('[PM Nodes] Loaded nodeDefs for locale:', locale);
             }
         } catch (nodeDefsError) {
-            console.warn('[PM Nodes] Failed to load nodeDefs:', nodeDefsError);
+            // console.warn('[PM Nodes] Failed to load nodeDefs:', nodeDefsError);
         }
         
         localeChangeListeners.forEach(listener => {
             try { listener(locale); } catch (e) {
-                console.error('[PM Nodes] Error in locale change listener:', e);
+                // console.error('[PM Nodes] Error in locale change listener:', e);
             }
         });
     } catch (error) {
-        console.error('[PM Nodes] Failed to load translations:', error);
+        // console.error('[PM Nodes] Failed to load translations:', error);
         translations = {};
     }
 }
@@ -120,14 +120,14 @@ export function onLocaleChange(callback) {
 // 更新节点分类翻译
 function updateNodeCategories() {
     if (!window.LiteGraph || !window.LiteGraph.registered_node_types) {
-        console.log('[PM Nodes] LiteGraph not available');
+        // console.log('[PM Nodes] LiteGraph not available');
         return;
     }
 
     const nodeCategories = translations['nodeCategories'];
     const nodeDefs = translations['nodeDefs'];
     
-    console.log('[PM Nodes] Updating categories and titles...');
+    // console.log('[PM Nodes] Updating categories and titles...');
 
     // 更新所有已注册的节点类型
     for (const [nodeType, nodeDef] of Object.entries(window.LiteGraph.registered_node_types)) {
@@ -138,7 +138,7 @@ function updateNodeCategories() {
             if (nodeDef._category) {
                 nodeDef._category = nodeCategories[originalCategory];
             }
-            console.log('[PM Nodes] Updated category for', nodeType, ':', originalCategory, '->', nodeDef.category);
+            // console.log('[PM Nodes] Updated category for', nodeType, ':', originalCategory, '->', nodeDef.category);
         }
 
         // 更新标题（从 nodeDefs 翻译中读取 display_name）
@@ -151,7 +151,7 @@ function updateNodeCategories() {
                 nodeDef.constructor.title = translatedTitle;
             }
             
-            console.log('[PM Nodes] Updated title for', nodeType, ':', translatedTitle);
+            // console.log('[PM Nodes] Updated title for', nodeType, ':', translatedTitle);
         }
     }
 
@@ -162,7 +162,7 @@ function updateNodeCategories() {
             if (nodeDefs && nodeDefs[nodeType] && nodeDefs[nodeType].display_name) {
                 const translatedTitle = nodeDefs[nodeType].display_name;
                 node.title = translatedTitle;
-                console.log('[PM Nodes] Updated instance title for', nodeType, ':', translatedTitle);
+                // console.log('[PM Nodes] Updated instance title for', nodeType, ':', translatedTitle);
             }
         }
     }
@@ -171,16 +171,16 @@ function updateNodeCategories() {
     if (window.app && window.app.ui && window.app.ui.nodeLibrary) {
         try {
             window.app.ui.nodeLibrary.rebuild();
-            console.log('[PM Nodes] Node library rebuilt');
+            // console.log('[PM Nodes] Node library rebuilt');
         } catch (e) {
-            console.warn('[PM Nodes] Failed to rebuild node library:', e);
+            // console.warn('[PM Nodes] Failed to rebuild node library:', e);
         }
     }
     
     // 重绘画布
     if (window.app && window.app.canvas) {
         window.app.canvas.setDirty(true, true);
-        console.log('[PM Nodes] Canvas redraw triggered');
+        // console.log('[PM Nodes] Canvas redraw triggered');
     }
 }
 
@@ -192,13 +192,13 @@ async function init() {
     // 第二步：等待 ComfyUI app 就绪后校准 locale
     const appReady = await waitForApp();
     if (!appReady) {
-        console.warn('[PM Nodes] App not ready after timeout, locale monitoring disabled');
+        // console.warn('[PM Nodes] App not ready after timeout, locale monitoring disabled');
         return;
     }
 
     const actualLocale = getCurrentLocale();
     if (actualLocale !== currentLocale) {
-        console.log('[PM Nodes] Correcting locale from', currentLocale, 'to', actualLocale);
+        // console.log('[PM Nodes] Correcting locale from', currentLocale, 'to', actualLocale);
         await fetchTranslations(actualLocale);
     }
 
@@ -210,7 +210,7 @@ async function init() {
     setInterval(() => {
         const newLocale = getCurrentLocale();
         if (newLocale !== lastLocale) {
-            console.log('[PM Nodes] Locale changed from', lastLocale, 'to', newLocale);
+            // console.log('[PM Nodes] Locale changed from', lastLocale, 'to', newLocale);
             lastLocale = newLocale;
             reloadTranslations(newLocale).then(() => {
                 updateNodeCategories();
@@ -218,7 +218,7 @@ async function init() {
         }
     }, 1000);
 
-    console.log('[PM Nodes] Locale monitoring started');
+    // console.log('[PM Nodes] Locale monitoring started');
 }
 
 export const initPromise = init();
