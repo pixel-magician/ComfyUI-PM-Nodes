@@ -17,6 +17,7 @@ class DynamicDropdownNode(IO.ComfyNode):
                 IO.Int.Output("index"),
                 IO.String.Output("selected_value"),
             ],
+            accept_all_inputs=True,
         )
 
     @staticmethod
@@ -43,11 +44,7 @@ class DynamicDropdownNode(IO.ComfyNode):
         return IO.NodeOutput(index, selection)
 
     @classmethod
-    def VALIDATE_INPUTS(cls, options, selection):
-        option_list = cls.parse_options(options)
-        if not option_list:
-            return "At least one option is required"
-        if selection not in option_list:
-            return f"Selected value '{selection}' is not in the options list"
+    def validate_inputs(cls, **kwargs) -> bool:
+        """跳过内置 Combo 校验，前端 JS 负责动态更新下拉选项的合法性。"""
         return True
 
