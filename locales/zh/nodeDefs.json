@@ -1,4 +1,33 @@
 {
+  "SimpleMath": {
+    "display_name": "简单数学运算",
+    "description": "使用表达式计算数学运算，支持变量a、b、c、d和基本运算符",
+    "inputs": {
+      "value": {
+        "name": "表达式"
+      },
+      "a": {
+        "name": "变量A"
+      },
+      "b": {
+        "name": "变量B"
+      },
+      "c": {
+        "name": "变量C"
+      },
+      "d": {
+        "name": "变量D"
+      }
+    },
+    "outputs": {
+      "0": {
+        "name": "整数结果"
+      },
+      "1": {
+        "name": "浮点结果"
+      }
+    }
+  },
   "DynamicDropdown": {
     "display_name": "动态下拉框",
     "description": "动态创建下拉选项并返回选中的索引和值",

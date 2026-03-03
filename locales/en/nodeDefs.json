@@ -1,4 +1,33 @@
 {
+  "SimpleMath": {
+    "display_name": "Simple Math",
+    "description": "Evaluate mathematical expressions with variables a, b, c, d and basic operators",
+    "inputs": {
+      "value": {
+        "name": "Expression"
+      },
+      "a": {
+        "name": "Variable A"
+      },
+      "b": {
+        "name": "Variable B"
+      },
+      "c": {
+        "name": "Variable C"
+      },
+      "d": {
+        "name": "Variable D"
+      }
+    },
+    "outputs": {
+      "0": {
+        "name": "Integer Result"
+      },
+      "1": {
+        "name": "Float Result"
+      }
+    }
+  },
   "DynamicDropdown": {
     "display_name": "Dynamic Dropdown",
     "description": "Dynamically create dropdown options and return selected index and value",

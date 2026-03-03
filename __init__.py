@@ -1,6 +1,7 @@
 from comfy_api.latest import ComfyExtension, IO
 from .if_branch_node import IfBranchNode
 from .dynamic_dropdown_node import DynamicDropdownNode
+from .simple_math_node import SimpleMathNode
 from .virtual_nodes import (
     PMFastMuter,
     PMFastBypasser,
@@ -16,6 +17,7 @@ class PMNodesExtension(ComfyExtension):
         return [
             DynamicDropdownNode,
             IfBranchNode,
+            SimpleMathNode,
             PMFastMuter,
             PMFastBypasser,
             PMFastGroupsMuter,
