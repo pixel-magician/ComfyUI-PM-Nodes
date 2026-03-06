@@ -9,7 +9,7 @@
  * The first input "Master Toggle" can receive external bool value to control all switches.
  */
 import { app } from "/scripts/app.js";
-import { t } from "./common/i18n.js";
+import { t, initPromise, updateNodeCategories } from "./common/i18n.js";
 
 const NODE_TYPE = "PM Fast Muter";
 const CATEGORY = "PM Nodes/Switch Management";
@@ -256,9 +256,12 @@ class PMFastMuterNode extends LGraphNode {
 
 app.registerExtension({
     name: "ComfyUI.PM.FastMuter",
-    registerCustomNodes() {
+    async registerCustomNodes() {
         LiteGraph.registerNodeType(NODE_TYPE, PMFastMuterNode);
         PMFastMuterNode.category = CATEGORY;
+        // 等待翻译初始化完成后更新节点标题
+        await initPromise;
+        updateNodeCategories();
     },
     loadedGraphNode(node) {
         if (node.type === NODE_TYPE) {

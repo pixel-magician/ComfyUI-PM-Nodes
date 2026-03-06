@@ -6,6 +6,7 @@
  */
 import { app } from "/scripts/app.js";
 import { createFastGroupsNodeClass } from "./pm_groups_shared.js";
+import { initPromise, updateNodeCategories } from "./common/i18n.js";
 const NODE_TYPE = "PM Fast Groups Muter";
 
 const PMFastGroupsMuterNode = createFastGroupsNodeClass({
@@ -17,9 +18,12 @@ const PMFastGroupsMuterNode = createFastGroupsNodeClass({
 
 app.registerExtension({
     name: "ComfyUI.PM.FastGroupsMuter",
-    registerCustomNodes() {
+    async registerCustomNodes() {
         LiteGraph.registerNodeType(NODE_TYPE, PMFastGroupsMuterNode);
         PMFastGroupsMuterNode.category = "PM Nodes/Switch Management";
+        // 等待翻译初始化完成后更新节点标题
+        await initPromise;
+        updateNodeCategories();
     },
     loadedGraphNode(node) {
         if (node.type === NODE_TYPE) {

@@ -118,7 +118,7 @@ export function onLocaleChange(callback) {
 }
 
 // 更新节点分类翻译
-function updateNodeCategories() {
+export function updateNodeCategories() {
     if (!window.LiteGraph || !window.LiteGraph.registered_node_types) {
         // console.log('[PM Nodes] LiteGraph not available');
         return;
