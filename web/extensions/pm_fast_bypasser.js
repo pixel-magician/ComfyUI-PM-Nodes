@@ -11,6 +11,7 @@
 import { app } from "/scripts/app.js";
 import { t, initPromise, updateNodeCategories } from "./common/i18n.js";
 import { resolveBoolFromInput } from "./common/link_value.js";
+import { syncNodeWidgetsToVue, removeWidgetFromVue } from "./common/vue_widget_sync.js";
 
 const NODE_TYPE = "PM Fast Bypasser";
 const CATEGORY = "PM Nodes/Switch Management";
@@ -156,16 +157,24 @@ class PMFastBypasserNode extends LGraphNode {
         }
 
         if (this.widgets && this.widgets.length > linkedNodes.length) {
+            for (let i = linkedNodes.length; i < this.widgets.length; i++) {
+                removeWidgetFromVue(this.widgets[i]);
+            }
             this.widgets.length = linkedNodes.length;
             changed = true;
         }
         return changed;
     }
 
+    /** 把开关的当前状态同步给 Nodes 2.0 的画布 */
+    _syncVueWidget() {
+        syncNodeWidgetsToVue(this);
+    }
+
     /**
      * 程序化修改开关值。
-     * Nodes 2.0 用 Vue 渲染节点，它把界面重绘的触发器串接在 widget.callback 上，
-     * 只有 callback 被调用界面才会刷新；单纯赋值 widget.value 在新 UI 下没有任何反应。
+     * 除了改值还要走一次 callback：右侧面板把 Vue 的重绘触发器串接在 widget.callback 上，
+     * 不调用就不会更新。
      */
     _setWidgetValue(widget, value) {
         if (widget.value === value) return false;
@@ -176,6 +185,7 @@ class PMFastBypasserNode extends LGraphNode {
         } finally {
             widget._pmApplying = false;
         }
+        this._syncVueWidget();
         return true;
     }
 
@@ -229,6 +239,8 @@ class PMFastBypasserNode extends LGraphNode {
         if (this._setWidgetValue(widget, linkedNode.mode === this.modeOn)) {
             changed = true;
         }
+        // 名称变化不经过 _setWidgetValue，这里兜底再同步一次
+        this._syncVueWidget();
         return changed;
     }
 

@@ -110,38 +110,61 @@ function isPassThrough(node) {
     return node.inputs?.length === 1 && node.outputs?.length === 1;
 }
 
-function readBoolFromOutput(node, slotIndex) {
+/** 按可信度从高到低列出「可能承载该输出值」的 widget */
+function widgetCandidatesForOutput(node, slotIndex) {
     const widgets = node?.widgets;
-    if (!widgets?.length) return null;
+    if (!widgets?.length) return [];
+
+    const seen = new Set();
+    const candidates = [];
+    const add = (widget) => {
+        if (widget && !seen.has(widget)) {
+            seen.add(widget);
+            candidates.push(widget);
+        }
+    };
 
     const output = node.outputs?.[slotIndex];
-    const names = [output?.widget?.name, output?.name, output?.localized_name, output?.label]
-        .filter((name) => typeof name === "string" && name !== "");
-    for (const name of names) {
-        const widget = widgets.find((w) => w.name === name || w.label === name);
-        const value = coerceBool(widget?.value);
-        if (value !== null) return value;
+    for (const name of [output?.widget?.name, output?.name, output?.localized_name, output?.label]) {
+        if (typeof name !== "string" || name === "") continue;
+        add(widgets.find((w) => w.name === name || w.label === name));
     }
 
     // 节点上只有一个布尔 widget 时它必然就是要找的那个，核心 Boolean 原始节点属于此类
     const boolWidgets = widgets.filter(
         (w) => typeof w.value === "boolean" || w.type === "toggle" || w.type === "boolean",
     );
-    if (boolWidgets.length === 1) {
-        const value = coerceBool(boolWidgets[0].value);
-        if (value !== null) return value;
-    }
+    if (boolWidgets.length === 1) add(boolWidgets[0]);
 
     for (const name of VALUE_WIDGET_NAMES) {
-        const widget = widgets.find((w) => String(w.name).toLowerCase() === name);
-        const value = coerceBool(widget?.value);
-        if (value !== null) return value;
+        add(widgets.find((w) => String(w.name).toLowerCase() === name));
     }
 
-    const bySlot = coerceBool(widgets[slotIndex]?.value);
-    if (bySlot !== null) return bySlot;
+    add(widgets[slotIndex]);
+    if (widgets.length === 1) add(widgets[0]);
+    return candidates;
+}
 
-    return widgets.length === 1 ? coerceBool(widgets[0].value) : null;
+/**
+ * widget 一旦被连线接管，它自身残留的就是过期值（前端不执行图，不会跟着上游刷新）。
+ * 这种情况必须继续沿那条连线往上追，否则串联多个 Boolean 节点时永远读到初始值。
+ */
+function findLinkFeedingOutput(node, slotIndex) {
+    for (const widget of widgetCandidatesForOutput(node, slotIndex)) {
+        const slot =
+            node.getSlotFromWidget?.(widget) ??
+            node.inputs?.find((i) => i.widget?.name === widget.name || i.name === widget.name);
+        if (slot?.link != null) return slot.link;
+    }
+    return null;
+}
+
+function readBoolFromOutput(node, slotIndex) {
+    for (const widget of widgetCandidatesForOutput(node, slotIndex)) {
+        const value = coerceBool(widget.value);
+        if (value !== null) return value;
+    }
+    return null;
 }
 
 /**
@@ -204,6 +227,14 @@ export function traceBoolFromInput(node, slotIndex = 0) {
                 linkId = upstream.link;
                 continue;
             }
+        }
+
+        const feedingLink = findLinkFeedingOutput(originNode, link.origin_slot);
+        if (feedingLink != null) {
+            step.viaWidgetInput = true;
+            graph = originNode.graph ?? graph;
+            linkId = feedingLink;
+            continue;
         }
 
         const value = readBoolFromOutput(originNode, link.origin_slot);
