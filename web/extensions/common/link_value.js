@@ -4,7 +4,7 @@
  * 从节点的某个输入槽出发，沿链路向上追溯，读取上游提供的布尔值。
  * 相比直接读 `graph.links[id]` 再取 widget，这里额外处理了几种前端会遇到的情况：
  *
- *   1. 链路起点是子图的输入边界（origin_id === -10），此时 getNodeById 必定返回 null，
+ *   1. 链路起点是子图的输入边界，此时 getNodeById 必定返回 null，
  *      需要找到父级子图节点，改从它对应的输入槽继续往上追。
  *   2. 上游节点本身是子图节点，需要下钻到子图内部的输出边界继续追。
  *   3. 中间存在 Reroute 之类的直通节点。
@@ -13,8 +13,10 @@
  */
 import { app } from "/scripts/app.js";
 
-const SUBGRAPH_INPUT_ID = -10;
-const SUBGRAPH_OUTPUT_ID = -20;
+// 兜底用的边界节点 id。前端实际给出的是字符串（如 "-10"），所以一律按字符串比较，
+// 不能直接和数字做 === 判断。
+const SUBGRAPH_INPUT_ID = "-10";
+const SUBGRAPH_OUTPUT_ID = "-20";
 const MAX_HOPS = 32;
 
 const TRUE_WORDS = new Set(["true", "1", "yes", "on", "enable", "enabled"]);
@@ -30,6 +32,31 @@ function coerceBool(value) {
         if (FALSE_WORDS.has(text)) return false;
     }
     return null;
+}
+
+/** 节点 id 有时是数字有时是字符串，统一按字符串比较 */
+function sameNodeId(a, b) {
+    if (a === b) return true;
+    if (a == null || b == null) return false;
+    return String(a) === String(b);
+}
+
+/**
+ * 链路起点是否为子图的输入边界。
+ * 优先用链路自带的 originIsIoNode 标记，其次和子图 inputNode 的 id 比对，
+ * 最后才回退到固定 id，尽量不依赖某一个版本的实现细节。
+ */
+function isFromSubgraphInput(link, graph) {
+    if (link?.originIsIoNode === true) return true;
+    if (sameNodeId(link?.origin_id, graph?.inputNode?.id)) return true;
+    return sameNodeId(link?.origin_id, SUBGRAPH_INPUT_ID);
+}
+
+/** 链路终点是否为子图的输出边界 */
+function isToSubgraphOutput(link, graph) {
+    if (link?.targetIsIoNode === true) return true;
+    if (sameNodeId(link?.target_id, graph?.outputNode?.id)) return true;
+    return sameNodeId(link?.target_id, SUBGRAPH_OUTPUT_ID);
 }
 
 function getLink(graph, linkId) {
@@ -87,7 +114,7 @@ function findSubgraphNodeInstance(subgraph) {
 
 function findLinkToSubgraphOutput(subgraph, slotIndex) {
     for (const link of iterLinks(subgraph)) {
-        if (link?.target_id === SUBGRAPH_OUTPUT_ID && link.target_slot === slotIndex) return link;
+        if (link?.target_slot === slotIndex && isToSubgraphOutput(link, subgraph)) return link;
     }
     return null;
 }
@@ -190,7 +217,7 @@ export function traceBoolFromInput(node, slotIndex = 0) {
         const step = { hop, linkId, originId: link.origin_id, originSlot: link.origin_slot };
         trace.push(step);
 
-        if (link.origin_id === SUBGRAPH_INPUT_ID) {
+        if (isFromSubgraphInput(link, graph)) {
             const subgraphNode = findSubgraphNodeInstance(graph);
             if (!subgraphNode) return fail("链路来自子图输入边界，但找不到父级子图节点");
             step.originType = "SubgraphInput";
