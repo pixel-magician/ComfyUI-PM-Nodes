@@ -10,6 +10,7 @@
  */
 import { app } from "/scripts/app.js";
 import { t, initPromise, updateNodeCategories } from "./common/i18n.js";
+import { resolveBoolFromInput } from "./common/link_value.js";
 
 const NODE_TYPE = "PM Fast Bypasser";
 const CATEGORY = "PM Nodes/Switch Management";
@@ -57,21 +58,7 @@ class PMFastBypasserNode extends LGraphNode {
     }
 
     _getGlobalBoolValue() {
-        const input = this.inputs?.[0];
-        if (!input || !input.link) return null;
-        const link = this.graph?.links[input.link];
-        if (!link) return null;
-        const sourceNode = this.graph.getNodeById(link.origin_id);
-        if (!sourceNode) return null;
-        const outputSlot = link.origin_slot;
-        const output = sourceNode.outputs?.[outputSlot];
-        if (output) {
-            const widget = sourceNode.widgets?.find(w => w.name === output.name);
-            if (widget != null && widget.value != null) return !!widget.value;
-        }
-        const widgetBySlot = sourceNode.widgets?.[outputSlot];
-        if (widgetBySlot != null && widgetBySlot.value != null) return !!widgetBySlot.value;
-        return null;
+        return resolveBoolFromInput(this, 0);
     }
 
     _doStabilize() {
@@ -159,6 +146,7 @@ class PMFastBypasserNode extends LGraphNode {
             if (!widget) {
                 this._tempWidth = this.size[0];
                 widget = this.addWidget("toggle", "", false, "", { on: "yes", off: "no" });
+                this._initWidget(widget);
                 changed = true;
             }
 
@@ -174,37 +162,71 @@ class PMFastBypasserNode extends LGraphNode {
         return changed;
     }
 
+    /**
+     * 程序化修改开关值。
+     * Nodes 2.0 用 Vue 渲染节点，它把界面重绘的触发器串接在 widget.callback 上，
+     * 只有 callback 被调用界面才会刷新；单纯赋值 widget.value 在新 UI 下没有任何反应。
+     */
+    _setWidgetValue(widget, value) {
+        if (widget.value === value) return false;
+        widget._pmApplying = true;
+        try {
+            widget.value = value;
+            widget.callback?.(value);
+        } finally {
+            widget._pmApplying = false;
+        }
+        return true;
+    }
+
+    /**
+     * 只在 widget 创建时调用一次。
+     * callback 之后绝不能再被重新赋值，否则会抹掉 Vue 注入的重绘触发器；
+     * 而 Vue 侧只会包装一次，触发器丢失后就再也不会补回来。
+     */
+    _initWidget(widget) {
+        widget.doModeChange = (forceValue, skipOtherNodeCheck) => {
+            const target = widget._pmTargetNode;
+            if (!target) return;
+
+            let newValue = forceValue != null ? forceValue : target.mode === this.modeOff;
+            if (skipOtherNodeCheck !== true) {
+                if (newValue && this.properties["toggleRestriction"]?.includes(" one")) {
+                    for (const w of this.widgets) {
+                        w.doModeChange?.(false, true);
+                    }
+                } else if (!newValue && this.properties["toggleRestriction"] === "always one") {
+                    newValue = this.widgets.every((w) => !w.value || w === widget);
+                }
+            }
+            this._changeModeOfNode(target, newValue ? this.modeOn : this.modeOff);
+            this._setWidgetValue(widget, newValue);
+        };
+
+        widget.callback = () => {
+            if (widget._pmApplying) return;
+            const globalBool = this._getGlobalBoolValue();
+            if (globalBool != null) {
+                // 主开关接管期间手动点击无效，把显示值退回受控状态
+                this._setWidgetValue(widget, globalBool);
+                return;
+            }
+            widget.doModeChange();
+        };
+    }
+
     _setWidget(widget, linkedNode) {
         let changed = false;
-        const value = linkedNode.mode === this.modeOn;
-        const name = `${t('enable', 'Enable')} ${linkedNode.title}`;
+        widget._pmTargetNode = linkedNode;
 
+        const name = `${t('enable', 'Enable')} ${linkedNode.title}`;
         if (widget.name !== name) {
             widget.name = name;
             widget.options = { on: "yes", off: "no" };
-            widget.value = value;
+            changed = true;
+        }
 
-            widget.doModeChange = (forceValue, skipOtherNodeCheck) => {
-                let newValue = forceValue != null ? forceValue : linkedNode.mode === this.modeOff;
-                if (skipOtherNodeCheck !== true) {
-                    if (newValue && this.properties["toggleRestriction"]?.includes(" one")) {
-                        for (const w of this.widgets) {
-                            w.doModeChange(false, true);
-                        }
-                    } else if (!newValue && this.properties["toggleRestriction"] === "always one") {
-                        newValue = this.widgets.every((w) => !w.value || w === widget);
-                    }
-                }
-                this._changeModeOfNode(linkedNode, newValue ? this.modeOn : this.modeOff);
-                widget.value = newValue;
-            };
-
-            widget.callback = () => {
-                const globalBool = this._getGlobalBoolValue();
-                if (globalBool != null) return;
-                widget.doModeChange();
-            };
-
+        if (this._setWidgetValue(widget, linkedNode.mode === this.modeOn)) {
             changed = true;
         }
         return changed;

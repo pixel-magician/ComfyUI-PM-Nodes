@@ -6,6 +6,7 @@
  */
 import { app } from "/scripts/app.js";
 import { t } from "./common/i18n.js";
+import { resolveBoolFromInput } from "./common/link_value.js";
 
 const PROP_MATCH_COLORS = "matchColors";
 const PROP_MATCH_TITLE = "matchTitle";
@@ -365,21 +366,7 @@ export function createFastGroupsNodeClass({ nodeType, modeOn, modeOff, offMenuLa
         }
 
         _getInputBoolValue(inputIndex) {
-            const input = this.inputs?.[inputIndex];
-            if (!input || !input.link) return null;
-            const link = this.graph?.links[input.link];
-            if (!link) return null;
-            const sourceNode = this.graph.getNodeById(link.origin_id);
-            if (!sourceNode) return null;
-            const outputSlot = link.origin_slot;
-            const output = sourceNode.outputs?.[outputSlot];
-            if (output) {
-                const widget = sourceNode.widgets?.find(w => w.name === output.name);
-                if (widget != null && widget.value != null) return !!widget.value;
-            }
-            const widgetBySlot = sourceNode.widgets?.[outputSlot];
-            if (widgetBySlot != null && widgetBySlot.value != null) return !!widgetBySlot.value;
-            return null;
+            return resolveBoolFromInput(this, inputIndex);
         }
 
         refreshWidgets() {
